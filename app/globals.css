@@ -1,0 +1,212 @@
+@import "@flaticon/flaticon-uicons/css/all/all";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    @font-face {
+        font-family: Readex;
+        src: url('/fonts/ReadexProExtraLight.ttf');
+        font-weight: 200;
+    }
+
+    @font-face {
+        font-family: Readex;
+        src: url("/fonts/ReadexPro-Light.ttf");
+        font-weight: 300;
+    }
+
+    @font-face {
+        font-family: Readex;
+        src: url("/fonts/ReadexProRegular.ttf");
+        font-weight: 400;
+    }
+
+    @font-face {
+        font-family: Readex;
+        src: url("/fonts/ReadexProMedium.ttf");
+        font-weight: 500;
+    }
+
+    @font-face {
+        font-family: Readex;
+        src: url("/fonts/ReadexPro-SemiBold.ttf");
+        font-weight: 600;
+    }
+
+    @font-face {
+        font-family: Readex;
+        src: url("/fonts/ReadexPro-Bold.ttf");
+        font-weight: 700;
+    }
+}
+
+@layer components {
+    * {
+        @apply m-0 p-0 box-border text-base outline-purple/30 duration-100;
+    }
+
+    html{
+        @apply overflow-x-hidden;
+    }
+
+    body {
+        @apply font-readex font-normal text-black;
+    }
+
+    i {
+        @apply mt-0.5;
+    }
+
+    section{
+        @apply py-4 px-[5vw] md:px-[7vw] lg:px-[10vw];
+    }
+
+    ::selection {
+        @apply bg-purple/30;
+    }
+
+    img{
+        @apply w-full h-full object-cover;
+    }
+
+    .navbar{
+        @apply z-10 sticky top-0 flex items-center gap-12 w-full px-[5vw] py-5 h-[80px] border-b border-grey bg-white;
+    }
+
+    .h-cover{
+        @apply min-h-[calc(100vh-80px)];
+    }
+
+    .center{
+        @apply block mx-auto;
+    }
+
+    .btn-dark{
+        @apply whitespace-nowrap bg-black text-white rounded-full py-3 px-6 text-base font-semibold capitalize hover:bg-opacity-80;
+    }
+
+    .btn-light{
+        @apply btn-dark bg-grey text-black;
+    }
+
+    .input-box {
+        @apply w-[100%] rounded-md p-4 bg-grey pr-12 border font-medium border-grey focus:bg-transparent placeholder:text-black;
+    }
+
+    input:disabled, input:disabled ~ .input-icon{
+        @apply opacity-50;
+    }
+
+    .input-icon{
+        @apply absolute right-4 top-1/2 -translate-y-1/2;
+    }
+
+    .link{
+        @apply text-dark-grey hover:text-black hover:bg-grey p-3 px-4 block opacity-75;
+    }
+
+    .hide{
+        @apply opacity-0 pointer-events-none duration-100;
+    }
+
+    .show{
+        @apply opacity-100 pointer-events-auto;
+    }
+
+    .sidebar-link{
+        @apply flex gap-4 items-center py-5 text-dark-grey hover:text-black;
+    }
+
+    .sidebar-link.active{
+        @apply text-black border-l-2 border-black pr-6 bg-grey/50 -mr-6 md:rounded-tr-lg md:rounded-br-lg max-md:border-none;
+    }
+
+    #textEditor h2, h2{
+        @apply font-readex text-4xl leading-normal font-bold max-md:text-3xl max-md:leading-snug !important;
+    }
+
+    #textEditor h3, h3 {
+        @apply font-readex text-3xl leading-loose max-md:text-2xl max-md:leading-normal !important;
+    }
+
+    #textEditor *, .blog-page-content *{
+        @apply text-base text-justify leading-10 md:text-xl;
+    }
+
+    #textEditor *, .blog-page-content > h3 {
+        @apply !text-2xl font-bold
+    }
+
+    #textEditor *, .blog-page-content li {
+        @apply my-4
+    }
+
+    #textEditor *, .blog-page-content ol {
+        @apply pr-5 list-decimal
+    }
+
+    #textEditor *, .blog-page-content ul {
+        @apply pr-5 list-disc
+    }
+
+    #textEditor *, .blog-page-content  blockquote {
+        @apply bg-purple/10 p-3 pr-5 border-r-4 border-purple
+    }
+
+    #textEditor *, .blog-page-content > :has(h2, h1) {
+        @apply !text-3xl font-bold
+    }
+
+    #textEditor *, .blog-page-content > table {
+        @apply border border-grey !text-sm
+    }
+    #textEditor *, .blog-page-content > table thead tr th {
+        @apply border border-grey text-center !text-xl font-medium p-2
+    }
+    #textEditor *, .blog-page-content > table tbody tr td {
+        @apply border border-grey text-center !text-sm font-medium p-2
+    }
+    #textEditor a, .blog-page-content a{
+        @apply text-purple underline hover:opacity-50;
+    }
+
+    .tag{
+        @apply p-3 bg-grey rounded-full px-6 capitalize;
+    }
+
+    .blog-title{
+        @apply text-2xl font-medium leading-7 line-clamp-3 sm:line-clamp-2;
+    }
+
+    .blog-index{
+        @apply text-4xl sm:text-3xl lg:text-5xl font-bold text-grey leading-none;
+    }
+}
+
+iframe {
+    width: 100%;
+    
+}
+
+.ce-block__content, .ce-toolbar__content{
+    max-width: 900px;
+}
+
+.cdx-settings-button[data-tune='withBorder'],
+.cdx-settings-button[data-tune='withBackground'],
+.cdx-settings-button[data-tune='stretched'] {
+    display: none;
+}
+
+.tox-statusbar__branding {
+    display: none !important;
+}
+
+.tox-tinymce-aux, .tox-tinymce, .tox {
+    font-family: inherit !important;
+}
+
+.mce-content-body {
+    font-family: Readex, sans-serif !important;
+}
