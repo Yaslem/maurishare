@@ -34,6 +34,63 @@ export default class User {
         }
         return sendResponseServer({ status: "error", action: "getUserProfile", message: "هذا المستخدم غير موجود" })
     }
+    static async getProfileByAdmin({ username }) {
+        const user = await db.user.findUnique({
+            where: {
+                username
+            },
+            select: {
+                id: true,
+                photo: true,
+                username: true,
+                can_update_post: true,
+                can_create_post: true,
+                can_delete_post: true,
+                can_create_comment: true,
+                email: true,
+                bio: true,
+                name: true,
+                posts: {
+                  select: {
+                      _count: true
+                  }
+                },
+
+                socialLinks: {
+                    select: {
+                        instagram: true,
+                        facebook: true,
+                        twitter: true,
+                        youtube: true,
+                        website: true
+                    }
+                },
+                account: true,
+                createdAt: true
+            },
+        })
+        if (user) {
+            return sendResponseServer({ status: "success", action: "getUserProfile", data: user, message: "تم جلب المستخدم بنجاح 👍" })
+        }
+        return sendResponseServer({ status: "error", action: "getUserProfile", message: "هذا المستخدم غير موجود" })
+    }
+    static async getAllUsers(){
+        const users = await db.user.findMany({
+            select: {
+                id: true,
+                photo: true,
+                username: true,
+                email: true,
+                bio: true,
+                name: true,
+                createdAt: true
+            },
+        })
+        if (users.length) {
+            return sendResponseServer({ status: "success", action: "getAllUsers", data: users, message: "تم جلب المستخدمين بنجاح 👍" })
+        }
+        return sendResponseServer({ status: "error", action: "getAllUsers", message: "لا يوجد مستخدمين" })
+    }
     static async editProfile({ username, instagram, newUsername, bio, facebook, twitter, youtube, website }) {
         const bioLimit = 150
         if (!newUsername.length) {
@@ -83,6 +140,69 @@ export default class User {
             data: {
                 bio,
                 username: newUsername,
+                socialLinks: {
+                    update: {
+                        instagram,
+                        facebook,
+                        twitter,
+                        youtube,
+                        website
+                    }
+                }
+            }
+        })
+        return sendResponseServer({ status: "success", action: "editProfile", message: "تم تعديل الحساب بنجاح." })
+    }
+    static async editProfileByAdmin({ username, instagram, newUsername, bio, facebook, twitter, youtube, website, name, email, can_update_post,can_create_post,can_delete_post, can_create_comment }) {
+        const bioLimit = 150
+        if (!newUsername.length) {
+            return sendResponseServer({ status: "error", action: "editProfile", message: "اسم المستخدم مطلوب" })
+        }
+        if (bio.length > bioLimit) {
+            return sendResponseServer({ status: "error", action: "editProfile", message: `الوصف المختصر يجب أن يكون أقل من ${bioLimit} حرفا.` })
+        }
+        if (facebook.length) {
+            if (!facebook.includes(`https://`) || !facebook.includes(`.com`)) {
+                return sendResponseServer({ status: "error", action: "editProfile", message: `الرابط "${facebook}" غير صالح.` })
+            }
+        }
+
+        if (instagram.length) {
+            if (!instagram.includes(`https://`) || !instagram.includes(`.com`)) {
+                return sendResponseServer({ status: "error", action: "editProfile", message: `الرابط "${instagram}" غير صالح.` })
+            }
+        }
+
+        if (twitter.length) {
+            if (!twitter.includes(`https://`) || !twitter.includes(`.com`)) {
+                return sendResponseServer({ status: "error", action: "editProfile", message: `الرابط "${twitter}" غير صالح.` })
+            }
+        }
+
+        if (youtube.length) {
+            if (!youtube.includes(`https://`) || !youtube.includes(`.com`)) {
+                return sendResponseServer({ status: "error", action: "editProfile", message: `الرابط "${youtube}" غير صالح.` })
+            }
+        }
+
+        const user = await db.user.findUnique({
+            where: {
+                username: newUsername
+            },
+            select: {
+                id: true,
+                username: true
+            },
+        })
+        if (user && user.username !== username) {
+            return sendResponseServer({ status: "error", action: "editProfile", message: `اسم الحساب "${newUsername}" مستخدم بالفعل من قِبل شخص آخر,` })
+        }
+        await db.user.update({
+            where: { username },
+            data: {
+                bio,
+                username: newUsername,
+                name, email, can_update_post,can_create_post,can_delete_post, can_create_comment,
                 socialLinks: {
                     update: {
                         instagram,

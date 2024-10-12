@@ -15,7 +15,7 @@ export async function loader({ params, request }) {
     const post = await Post.getPostBySlug({ slug: params.slug })    
     if(post.status !== "error"){
         return json({
-            postData: post, 
+            postData: post,
             userAuthenticated: await getUserAuthenticated(request),
             isLikeUser: user ? await Post.getIslikeUserPost({user, slug: params.slug}) : false,
             comments: await Post.getCommentsPost({slug: params.slug}),
@@ -25,7 +25,7 @@ export async function loader({ params, request }) {
 }
 
 export const meta: MetaFunction = ({ data, matches }) => {        
-    return generatePageTitle({matches, current: `${data.postData.data.post.title}`});
+    return generatePageTitle({matches, current: `${data.postData.data.post.title}`, description: data.postData.data.post.title});
 };
 
 export async function action({request, params}: ActionFunctionArgs) {
@@ -43,6 +43,7 @@ export async function action({request, params}: ActionFunctionArgs) {
             return json(await Post.likePost({user, slug: params.slug, isLikedByUser}))
         }
         case "comment": {
+            if (!user.can_create_comment) return redirect("/dashboard/posts")
             return json(await Post.addCommentPost({user, slug: params.slug, comment}))
         }
         case "reply": {
@@ -56,7 +57,7 @@ export async function action({request, params}: ActionFunctionArgs) {
 }
 
 export default function PostSlug() {
-    const {postData: {data: {post, similar}}, userAuthenticated, isLikeUser, comments} = useLoaderData()        
+    const {postData: {data: {post, similar}}, userAuthenticated, isLikeUser, comments} = useLoaderData()
     const [commentsList, setCommentsList] = useState(comments)
     const [commentWrapper, setCommentWrapper] = useState(false)
 

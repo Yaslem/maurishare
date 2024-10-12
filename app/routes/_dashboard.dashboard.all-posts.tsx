@@ -1,5 +1,10 @@
-import { ActionFunctionArgs, MetaFunction, json } from "@remix-run/node"
-import { useActionData, useLoaderData, useSearchParams, useSubmit } from "@remix-run/react"
+import {ActionFunctionArgs, MetaFunction, json, redirect} from "@remix-run/node"
+import {
+    useActionData,
+    useLoaderData,
+    useSearchParams,
+    useSubmit
+} from "@remix-run/react"
 import { useEffect, useState } from "react"
 import AnimationWrapper from "~/common/Animation"
 import ManageDraftPost from "~/components/ManageDraftPost"
@@ -8,17 +13,20 @@ import NoDataMessage from "~/components/NoDataMessage"
 import InPageNavigation from "~/components/inPageNavigation"
 import Post from "~/controllers/Post.server"
 import { getUserAuthenticated } from "~/services/auth.server"
-import { action } from '~/routes/auth.signup';
 import toast from "react-hot-toast"
 import LoadMoreDataBtn from "~/components/LoadMoreDataBtn"
 import { generatePageTitle } from "~/helpers/Global"
 
 export async function loader({ request }) {
     const user = await getUserAuthenticated(request)
-    return json({
-        posts: await Post.getPostsByUsername({ username: user.username }),
-        drafts: await Post.getPostsDraftByUsername({ username: user.username }),
-    })
+    if(user.role === "ADMIN"){
+        return json({
+            user,
+            posts: await Post.getPostsByAdmin({}),
+            drafts: await Post.getPostsDraftByAdmin({}),
+        })
+    }
+    return redirect("/")
 }
 
 export const meta: MetaFunction = ({ data, matches }) => {
@@ -26,38 +34,45 @@ export const meta: MetaFunction = ({ data, matches }) => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-    let { action, page, postId, value } = Object.fromEntries(await request.formData());
+    let { action, page, postId, value} = Object.fromEntries(await request.formData());
     const user = await getUserAuthenticated(request)
     page = parseInt(page)
-    switch (action) {
-        case "searchQueryPost": {
-            return json({
-                posts: await Post.searchQuery({ value }),
-                drafts: await Post.searchDraftQuery({ value }),
-            })
-        }
-        case "paginationPost": {
-            return json({
-                posts: await Post.getPostsByUsername({ username: user.username, page }),
-                action,
-            })
-        }
-        case "paginationDraft": {
-            return json({
-                action,
-                drafts: await Post.getPostsDraftByUsername({ username: user.username, page }),
-            })
-        }
-        case "deletePost": {
-            return json(await Post.delete({ postId, user }))
+    if(user.role === "ADMIN"){
+        switch (action) {
+            case "searchQueryPost": {
+                return json({
+                    posts: await Post.searchQuery({ value }),
+                    drafts: await Post.searchDraftQuery({ value }),
+                })
+            }
+            case "paginationPost": {
+                return json({
+                    posts: await Post.getPostsByAdmin({ page }),
+                    action,
+                })
+            }
+            case "paginationDraft": {
+                return json({
+                    action,
+                    drafts: await Post.getPostsDraftByAdmin({ page }),
+                })
+            }
+            case "deletePost": {
+                if(!user.can_delete_post) return redirect("/dashboard/posts")
+                return json(await Post.delete({ postId, user }))
+            }
+            case "publishPost": {
+                value = value === "true"
+                return json(await Post.publish({ postId, value }))
+            }
         }
     }
-    return json({})
+    return redirect("/")
 }
 
 export default function Posts() {
-    const { posts, drafts, action } = useLoaderData()
-    const isTap = useSearchParams()[0].get("tap")    
+    const { posts, drafts, action, user } = useLoaderData()
+    const isTap = useSearchParams()[0].get("tap")
     const submit = useSubmit()
     const data = useActionData()
     const [postsList, setPostsList] = useState(posts)
@@ -72,6 +87,16 @@ export default function Posts() {
             }
             if (data.drafts && data.drafts.action === "searchDraftQuery") {
                 setDraftsList(data.drafts)
+            }
+            if (data.action && data.action === "publishPost") {
+                if (data.status === "error") {
+                    toast.error(data.message)
+                } else {
+                    toast.success(data.message)
+                    setTimeout(() => {
+                        location.reload()
+                    }, 1000)
+                }
             }
             if (data.action && data.action === "deletePost") {
                 if (data.status === "error") {
@@ -182,7 +207,7 @@ export default function Posts() {
                             {
                                 postsList.data.results.map((post, i) =>
                                     <AnimationWrapper key={i} transition={{ delay: i * 0.04 }}>
-                                        <ManagePublishedPostCard post={post} />
+                                        <ManagePublishedPostCard user={user} post={post} />
                                     </AnimationWrapper>
                                 )
                             }

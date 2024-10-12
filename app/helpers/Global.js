@@ -1,4 +1,4 @@
-export function generatePageTitle({matches, current}) {
+export function generatePageTitle({matches, current, description = ""}) {
     let parentMeta = matches.flatMap(
         (match) => match.meta ?? []
     );
@@ -16,7 +16,8 @@ export function generatePageTitle({matches, current}) {
 
     })
     return [{
-        title: newMeta.join(" - ")
+        title: newMeta.join(" - "),
+        description
     }]
 }
 export function exclude(user, keys) {

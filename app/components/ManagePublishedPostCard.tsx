@@ -1,8 +1,9 @@
 import { Link, useSubmit } from "@remix-run/react"
 import { useState } from "react"
 import getDay from "~/common/Date"
+import {Switch} from "~/components/Switch";
 
-const ManagePublishedPostCard = ({ post }) => {
+const ManagePublishedPostCard = ({ post, user = null }) => {
     const submit = useSubmit()
     const [showState, setShowState] = useState(false)
 
@@ -18,22 +19,45 @@ const ManagePublishedPostCard = ({ post }) => {
                     <div className="flex items-center gap-6 mt-3">
                         <Link to={`/post/edit/${post.id}`}>تعديل</Link>
                         <button onClick={() => setShowState(!showState)} className="pl-r py-2 underline lg:hidden">الحالة</button>
-                        <button onClick={() => {
-                        const formData = new FormData()
-                        formData.append("postId", post.id)
-                        formData.append("action", "deletePost")
-                        submit(formData, {method: "PUT"})
-                    }} className="pl-r py-2 underline text-red">حذف</button>
+                        {
+                            user.can_delete_post
+                                ? <button onClick={() => {
+                                    const formData = new FormData()
+                                    formData.append("postId", post.id)
+                                    formData.append("action", "deletePost")
+                                    submit(formData, {method: "PUT"})
+                                }} className="pl-r py-2 underline text-red">حذف</button>
+                                : null
+                        }
+                        {
+                            user && user.role === "ADMIN"
+                                ? <button onClick={() => {
+                                    const formData = new FormData()
+                                    formData.append("postId", post.id)
+                                    formData.append("value", !post.isPublished)
+                                    formData.append("action", "publishPost")
+                                    submit(formData, {method: "PUT"})
+                                }} className={"p-2 rounded-lg " + (post.isPublished ? "bg-black" : "bg-red") + " font-medium text-sm text-white"}>{post.isPublished ? "منشور" : "غير منشور"}</button>
+                                : <div className={"p-2 rounded bg-black/10 gap-2 flex items-center"}>
+                                    {
+                                        post.isPublished
+                                            ? <i className="fi fi-rr-assept-document text-black"></i>
+                                            : <i className="fi fi-rr-lock text-red"></i>
+
+                                    }
+                                    <span className={"text-sm font-medium " + (post.isPublished ? "text-black" : "text-red")}>{post.isPublished ? "منشور" : "غير منشور"}</span>
+                                </div>
+                        }
                     </div>
                 </div>
                 <div className="max-lg:hidden">
-                    <PostState state={post.activity} />
+                    <PostState state={post.activity}/>
                 </div>
             </div>
             {
                 showState
                     ? <div>
-                        <PostState state={post.activity} />
+                        <PostState state={post.activity}/>
                     </div>
                     : null
             }
@@ -41,9 +65,9 @@ const ManagePublishedPostCard = ({ post }) => {
     )
 }
 
-const PostState = ({ state }) => {
-    function getValueName(value){
-        switch(value){
+const PostState = ({state}) => {
+    function getValueName(value) {
+        switch (value) {
             case "totalLikes":
                 return "الإعجابات"
             case "totalComments":

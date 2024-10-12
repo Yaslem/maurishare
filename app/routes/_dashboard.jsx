@@ -12,15 +12,16 @@ export async function loader({ request, params }) {
         return redirect("/auth/signin")
     }
     return json({
+        user,
         newNotification: user ? await User.getNewNotification({username: user.username}) : false,
     });
 }
 export default function Dashboard() {
-    let {newNotification} = useLoaderData()
+    let {newNotification, user} = useLoaderData()
     newNotification = newNotification.status === "success" ? true : false
     return (
         <section className="relative flex gap-10 py-0 m-0 max-md:flex-col">
-            <SideNav newNotification={newNotification} />
+            <SideNav user={user} newNotification={newNotification} />
             <div className="max-md:-mt-8 mt-5 w-full">
                 <Outlet />
             </div>

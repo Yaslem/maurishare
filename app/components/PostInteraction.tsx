@@ -35,9 +35,13 @@ const PostInteraction = ({ post, user, isLikeUser, commentWrapper, setCommentWra
                         <i className={"fi " + (isLikedByUser ? "fi-sr-heart" : "fi-rr-heart")}></i>
                     </button>
                     <p className="text-xl text-dark-grey">{totalLikes}</p>
-                    <button onClick={() => setCommentWrapper(!commentWrapper)} className="w-10 h-10 rounded-full flex items-center justify-center bg-grey/80">
-                        <i className="fi fi-rr-comment-dots"></i>
-                    </button>
+                    {
+                        user 
+                            ? <button onClick={() => setCommentWrapper(!commentWrapper)} className="w-10 h-10 rounded-full flex items-center justify-center bg-grey/80">
+                                <i className="fi fi-rr-comment-dots"></i>
+                            </button>
+                            : <p className="text-xl text-dark-grey">التعليقات: </p>
+                    }
                     <p className="text-xl text-dark-grey">{post.activity.totalComments}</p>
                 </div>
                 <div className="flex gap-6 items-center">

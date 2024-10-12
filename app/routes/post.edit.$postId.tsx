@@ -8,6 +8,7 @@ import Post from "~/controllers/Post.server"
 import { generatePageTitle } from "~/helpers/Global"
 import { postActions } from "~/redux/slices/postSlice"
 import { getUserAuthenticated, isAuthenticated } from "~/services/auth.server"
+import {NotAllowed} from "~/components/NotAllowed";
 
 export async function loader({request, params}) {
     const isSignIn = await isAuthenticated(request)
@@ -18,15 +19,15 @@ export async function loader({request, params}) {
     }
     const post = await Post.getPostById({ id: params.postId })    
     if(post.status !== "error"){
-        if(userAuthenticated.username === post.data.author.username){
-            return json(post);
+        if(userAuthenticated.username === post.data.author.username || userAuthenticated.role === "ADMIN"){
+            return json({post, user: userAuthenticated});
         }
     }
     return redirect("/");
 }
 
 export const meta: MetaFunction = ({ data, matches }) => {    
-    return generatePageTitle({matches, current: "تعديل المنشور " + `"${data.data.title}"`});
+    return generatePageTitle({matches, current: "تعديل المنشور " + `"${data.post.data.title}"`});
 };
 
 export async function action({request, params}: ActionFunctionArgs) {
@@ -41,11 +42,13 @@ export async function action({request, params}: ActionFunctionArgs) {
         case "create": {
             draft = draft === "true"
             tags = tags.length === 0 ? "" : [...tags.split(",")]
+            if(!user.can_create_post) return redirect("/dashboard/posts")
             return json(await Post.create({img, title, des, tags, content, draft, user}))
         }
         case "edit": {
             draft = draft === "true"            
             tags = tags.length === 0 ? "" : [...tags.split(",")]
+            if(!user.can_update_post) return redirect("/dashboard/posts")
             return json(await Post.edit({img, title, des, tags, content, draft, user, id: params.postId}))
         }
     }
@@ -54,7 +57,7 @@ export async function action({request, params}: ActionFunctionArgs) {
 
 
 export default function editPost(){
-    const post = useLoaderData()
+    const {post, user} = useLoaderData()
     const [editorState, setEditorState] = useState("editor")
     const dispatch = useDispatch()
 
@@ -68,8 +71,11 @@ export default function editPost(){
         dispatch(postActions.setContent(post.data.content))
         dispatch(postActions.setTags(tagsNames))
     }, [])
-    
-    return (
-        editorState === "editor" ? <PostEditor setEditorState={setEditorState} /> : <PublishForm setEditorState={setEditorState} />
-    )
+    if(user.can_update_post){
+        return (
+            editorState === "editor" ? <PostEditor setEditorState={setEditorState} /> : <PublishForm setEditorState={setEditorState} />
+        )
+    }
+    return <NotAllowed message={"عفوا، لقد تم منعك من تعديل هذا المنشور، رجاء تواصل مع إدارة الموقع."} />
+
 }

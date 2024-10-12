@@ -8,25 +8,34 @@ datasource db {
 }
 
 model User {
-  id              String         @id @default(uuid())
-  name            String
-  email           String         @unique
-  password        String
-  username        String         @unique
-  bio             String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  photo           String         @default("avatars/default_photo.png")
-  posts           Post[]
-  socialLinks     SocialLinks?
-  account     AccountInfo?
-  notificationFor Notification[] @relation("notificationFor")
-  notifications   Notification[] @relation("notifications")
-
-  commentFor Comment[] @relation("commentFor")
-  comments   Comment[] @relation("comments")
+  id                 String         @id @default(uuid())
+  name               String
+  email              String         @unique
+  password           String
+  username           String         @unique
+  bio                String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  photo              String         @default("avatars/default_photo.png")
+  role               Role           @default(USER)
+  can_update_post    Boolean        @default(true)
+  can_create_post    Boolean        @default(true)
+  can_delete_post    Boolean        @default(true)
+  can_create_comment Boolean        @default(true)
+  posts              Post[]
+  socialLinks        SocialLinks?
+  account            AccountInfo?
+  notificationFor    Notification[] @relation("notificationFor")
+  notifications      Notification[] @relation("notifications")
+  commentFor         Comment[]      @relation("commentFor")
+  comments           Comment[]      @relation("comments")
 
   @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 model SocialLinks {
@@ -44,8 +53,8 @@ model SocialLinks {
 
 model AccountInfo {
   id         String @id @default(uuid())
-  userId    String @unique
-  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String @unique
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   totalPosts Int    @default(0)
   totalReads Int    @default(0)
 
@@ -55,17 +64,18 @@ model AccountInfo {
 model Post {
   id            String         @id @default(uuid())
   title         String
-  slug         String
+  slug          String
   banner        String?
-  des           String?         @db.MediumText
-  content       String?         @db.LongText
+  des           String?        @db.MediumText
+  content       String?        @db.LongText
   draft         Boolean        @default(false)
+  isPublished   Boolean        @default(true)
   publishedAt   DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  authorId      String         
+  authorId      String
   author        User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
   tags          Tag[]
-  activity          Activity?
+  activity      Activity?
   comments      Comment[]
   notifications Notification[]
 
@@ -78,16 +88,16 @@ model Notification {
   seen               Boolean          @default(false)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
-  notificationForId  String           
-  userId             String           
-  postId             String    
-  repliedOnCommentId String?   
-  commentId String?
-  commentReplyId String?
+  notificationForId  String
+  userId             String
+  postId             String
+  repliedOnCommentId String?
+  commentId          String?
+  commentReplyId     String?
   notificationFor    User             @relation("notificationFor", fields: [notificationForId], references: [id], onDelete: Cascade)
-  repliedOnComment    Comment?             @relation("repliedOnComment", fields: [repliedOnCommentId], references: [id], onDelete: Cascade)
-  comment    Comment?             @relation("comment", fields: [commentId], references: [id], onDelete: Cascade)
-  reply    Comment?             @relation("reply", fields: [commentReplyId], references: [id], onDelete: Cascade)
+  repliedOnComment   Comment?         @relation("repliedOnComment", fields: [repliedOnCommentId], references: [id], onDelete: Cascade)
+  comment            Comment?         @relation("comment", fields: [commentId], references: [id], onDelete: Cascade)
+  reply              Comment?         @relation("reply", fields: [commentReplyId], references: [id], onDelete: Cascade)
   user               User             @relation("notifications", fields: [userId], references: [id], onDelete: Cascade)
   post               Post             @relation(fields: [postId], references: [id], onDelete: Cascade)
 
@@ -103,12 +113,12 @@ enum NotificationType {
 model Comment {
   id                String         @id @default(uuid())
   postId            String?
-  postAuthorId      String? 
-  post              Post?           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postAuthorId      String?
+  post              Post?          @relation(fields: [postId], references: [id], onDelete: Cascade)
   content           String
   commentedById     String?
   commentedBy       User?          @relation("comments", fields: [commentedById], references: [id], onDelete: Cascade)
-  postAuthor       User?          @relation("commentFor", fields: [postAuthorId], references: [id], onDelete: Cascade)
+  postAuthor        User?          @relation("commentFor", fields: [postAuthorId], references: [id], onDelete: Cascade)
   parentId          String?
   parent            Comment?       @relation("children", fields: [parentId], references: [id], onDelete: Cascade)
   children          Comment[]      @relation("children")
@@ -128,14 +138,14 @@ model Activity {
   totalComments       Int    @default(0)
   totalReads          Int    @default(0)
   totalParentComments Int    @default(0)
-  postId            String @unique     
-  post              Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId              String @unique
+  post                Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@map("activities")
 }
 
 model Tag {
-  id     String @id @default(uuid())
-  name   String
-  posts    Post[]
+  id    String @id @default(uuid())
+  name  String
+  posts Post[]
 }

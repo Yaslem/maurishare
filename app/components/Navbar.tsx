@@ -25,7 +25,8 @@ const Navbar = ({user, newNotification}) => {
     return (
         <nav className={"navbar z-50"}>
             <Link to={"/"} className={"flex-none"}>
-                <h1 className="font-bold text-2xl">موريشير</h1>
+                <img className="max-sm:w-[100px] w-[180px] h-auto" src="/images/logo.png" />
+                {/* <h1 className="font-bold text-2xl">موريشير</h1> */}
             </Link>
 
             <div className={"absolute w-full bg-white right-0 top-full mt-0.5 border-b border-grey py-4 px-[5vw] md:border-0 md:block md:relative md:inset-0 md:p-0 md:w-auto md:show " + (searchBoxVisibility ? "show" : "hide")}>
@@ -44,6 +45,10 @@ const Navbar = ({user, newNotification}) => {
             <Link to={"/post/create"} className={"hidden md:flex gap-2 link"}>
                 <i className="fi fi-rr-edit"></i>
                 <p>اكتب</p>
+            </Link>
+            <Link to={"mailto:contact@maurishare.com"} className={"max-sm:w-12 max-sm:h-12 flex items-center justify-center rounded-full bg-grey relative hover:bg-black/10 md:flex gap-2 link"}>
+                <i className="fi fi-rr-envelope"></i>
+                <p className="hidden md:block">تواصل معنا</p>
             </Link>
             {
                 user

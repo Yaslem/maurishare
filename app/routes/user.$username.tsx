@@ -109,7 +109,7 @@ export default function UserId() {
                     {
                         userAuthenticated && userAuthenticated.username === params.username
                             ? <div className="flex gap-4 mt-2">
-                                <Link to={"/dashboard/user/edit-profile"} className="btn-light rounded-md">تعديل الملف الشخصي</Link>
+                                <Link to={"/dashboard/edit-profile"} className="btn-light rounded-md">تعديل الملف الشخصي</Link>
                             </div>
                             : null
                     }

@@ -20,18 +20,21 @@ export default class Post {
         const maxLimit = 5
         const count = await db.post.count({
             where: {
-                draft: false
+                draft: false,
+                isPublished: true,
             },
         })
         const posts = await db.post.findMany({
             where: {
-                draft: false
+                draft: false,
+                isPublished: true,
             },
             select: {
                 id: true,
                 title: true,
                 slug: true,
                 des: true,
+                isPublished: true,
                 banner: true,
                 activity: true,
                 tags: true,
@@ -78,6 +81,7 @@ export default class Post {
                 title: true,
                 slug: true,
                 des: true,
+                                isPublished: true,
                 banner: true,
                 activity: {
                     select: {
@@ -108,6 +112,53 @@ export default class Post {
         }
         return sendResponseServer({ status: "error", action: "getPostsByUsername", data: {count}, message: "لا توجد منشورات" })
     }
+    static async getPostsByAdmin({ page = 1 }) {
+        const maxLimit = 5
+        const count = await db.post.count({
+            where: {
+                draft: false,
+            },
+        })
+        const posts = await db.post.findMany({
+            where: {
+                draft: false,
+            },
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                des: true,
+                banner: true,
+                isPublished: true,
+                activity: {
+                    select: {
+                        totalComments: true,
+                        totalLikes: true,
+                        totalReads: true,
+                    }
+                },
+                tags: true,
+                publishedAt: true,
+                author: {
+                    select: {
+                        id: true,
+                        photo: true,
+                        username: true,
+                        name: true
+                    }
+                }
+            },
+            orderBy: {
+                publishedAt: "asc"
+            },
+            take: maxLimit,
+            skip: (page - 1) * maxLimit,
+        })
+        if (posts.length) {
+            return sendResponseServer({ status: "success", action: "getPostsByAdmin", data: { results: posts, count, page }, message: "تم جلب المنشورات بنجاح 👍" })
+        }
+        return sendResponseServer({ status: "error", action: "getPostsByAdmin", data: {count}, message: "لا توجد منشورات" })
+    }
     static async getPostsDraftByUsername({ page = 1, username }) {
         const maxLimit = 5
         const count = await db.post.count({
@@ -130,6 +181,7 @@ export default class Post {
                 title: true,
                 slug: true,
                 des: true,
+                                isPublished: true,
                 banner: true,
                 activity: {
                     select: {
@@ -160,11 +212,59 @@ export default class Post {
         }
         return sendResponseServer({ status: "error", action: "getPostsDraftByUsername", message: "لا توجد منشورات" })
     }
+    static async getPostsDraftByAdmin({ page = 1 }) {
+        const maxLimit = 5
+        const count = await db.post.count({
+            where: {
+                draft: true,
+            },
+        })
+        const posts = await db.post.findMany({
+            where: {
+                draft: true
+            },
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                des: true,
+                banner: true,
+                isPublished: true,
+                activity: {
+                    select: {
+                        totalComments: true,
+                        totalLikes: true,
+                        totalReads: true,
+                    }
+                },
+                tags: true,
+                publishedAt: true,
+                author: {
+                    select: {
+                        id: true,
+                        photo: true,
+                        username: true,
+                        name: true
+                    }
+                }
+            },
+            orderBy: {
+                publishedAt: "asc"
+            },
+            take: maxLimit,
+            skip: (page - 1) * maxLimit,
+        })
+        if (posts.length) {
+            return sendResponseServer({ status: "success", action: "getPostsDraftByAdmin", data: { results: posts, count, page }, message: "تم جلب المنشورات بنجاح 👍" })
+        }
+        return sendResponseServer({ status: "error", action: "getPostsDraftByAdmin", message: "لا توجد منشورات" })
+    }
     static async getPostBySlug({ slug }) {
         const getPost = await db.post.findFirst({
             where: {
                 draft: false,
-                slug
+                slug,
+                isPublished: true
             },
             select: {
                 id: true,
@@ -222,7 +322,8 @@ export default class Post {
                     title: true,
                     slug: true,
                     des: true,
-                    banner: true,
+                                    isPublished: true,
+                banner: true,
                     activity: {
                         select: {
                             id: true,
@@ -253,6 +354,7 @@ export default class Post {
             const similar = await db.post.findMany({
                 where: {
                     draft: false,
+                    isPublished: true,
                     tags: {
                         some: {
                             name: {
@@ -269,7 +371,8 @@ export default class Post {
                     title: true,
                     slug: true,
                     des: true,
-                    banner: true,
+                                    isPublished: true,
+                banner: true,
                     activity: true,
                     tags: true,
                     publishedAt: true,
@@ -313,7 +416,8 @@ export default class Post {
                     title: true,
                     slug: true,
                     des: true,
-                    banner: true,
+                                    isPublished: true,
+                banner: true,
                     activity: {
                         select: {
                             id: true,
@@ -852,13 +956,14 @@ export default class Post {
                 return sendResponseServer({ status: "success", action: "getCommentsPost", data: { results: comments, count, page }, message: "تم جلب تعليقات المنشور بنجاح 👍" })
             }
         }
-        return sendResponseServer({ status: "error", action: "getCommentsPost", message: "لا توجد منشورات" })
+        return sendResponseServer({ status: "error", action: "getCommentsPost", message: "لا توجد تعليقات" })
     }
     static async search({ tag, page = 1 }) {
         const maxLimit = 5
         const count = await db.post.count({
             where: {
                 draft: false,
+                isPublished: true,
                 tags: {
                     some: {
                         name: {
@@ -871,6 +976,7 @@ export default class Post {
         const posts = await db.post.findMany({
             where: {
                 draft: false,
+                isPublished: true,
                 tags: {
                     some: {
                         name: {
@@ -884,6 +990,7 @@ export default class Post {
                 title: true,
                 slug: true,
                 des: true,
+                                isPublished: true,
                 banner: true,
                 activity: true,
                 tags: true,
@@ -913,6 +1020,7 @@ export default class Post {
         const count = await db.post.count({
             where: {
                 draft: false,
+                isPublished: true,
                 title: {
                     contains: value
                 },
@@ -921,6 +1029,7 @@ export default class Post {
         const posts = await db.post.findMany({
             where: {
                 draft: false,
+                isPublished: true,
                 title: {
                     contains: value
                 },
@@ -930,6 +1039,7 @@ export default class Post {
                 title: true,
                 slug: true,
                 des: true,
+                                isPublished: true,
                 banner: true,
                 activity: {
                     select: {
@@ -982,6 +1092,7 @@ export default class Post {
                 title: true,
                 slug: true,
                 des: true,
+                                isPublished: true,
                 banner: true,
                 activity: {
                     select: {
@@ -1016,13 +1127,15 @@ export default class Post {
         const maxLimit = 5
         const posts = await db.post.findMany({
             where: {
-                draft: false
+                draft: false,
+                isPublished: true,
             },
             select: {
                 id: true,
                 title: true,
                 slug: true,
                 activity: true,
+                isPublished: true,
                 publishedAt: true,
                 author: {
                     select: {
@@ -1162,6 +1275,21 @@ export default class Post {
             }
         })
         return sendResponseServer({ status: "success", action: "deletePost", data: {postId}, message: "تم حذف المنشور بنجاح 👍" })
+    }
+    static async publish({ postId, value }) {
+        if (!postId.length) {
+            return sendResponseServer({ status: "error", action: "publishPost", message: "المنشور مطلوب" })
+        }
+        await db.post.update({
+            where: {
+                id: postId
+            },
+            data: {
+                isPublished: value
+            }
+        })
+
+        return sendResponseServer({ status: "success", action: "publishPost", data: {postId}, message: "تم تحديث المنشور بنجاح 👍" })
     }
     static async edit({ title, img, des, tags, content, draft, user, id }) {
         let newContent = content.replaceAll("uploads", '/uploads').replaceAll("//uploads", '/uploads')

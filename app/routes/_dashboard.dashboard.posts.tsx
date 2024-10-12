@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, MetaFunction, json } from "@remix-run/node"
+import {ActionFunctionArgs, MetaFunction, json, redirect} from "@remix-run/node"
 import { useActionData, useLoaderData, useSearchParams, useSubmit } from "@remix-run/react"
 import { useEffect, useState } from "react"
 import AnimationWrapper from "~/common/Animation"
@@ -8,7 +8,6 @@ import NoDataMessage from "~/components/NoDataMessage"
 import InPageNavigation from "~/components/inPageNavigation"
 import Post from "~/controllers/Post.server"
 import { getUserAuthenticated } from "~/services/auth.server"
-import { action } from '~/routes/auth.signup';
 import toast from "react-hot-toast"
 import LoadMoreDataBtn from "~/components/LoadMoreDataBtn"
 import { generatePageTitle } from "~/helpers/Global"
@@ -16,6 +15,7 @@ import { generatePageTitle } from "~/helpers/Global"
 export async function loader({ request }) {
     const user = await getUserAuthenticated(request)
     return json({
+        user,
         posts: await Post.getPostsByUsername({ username: user.username }),
         drafts: await Post.getPostsDraftByUsername({ username: user.username }),
     })
@@ -49,6 +49,7 @@ export async function action({ request }: ActionFunctionArgs) {
             })
         }
         case "deletePost": {
+            if(!user.can_delete_post) return redirect("/dashboard/posts")
             return json(await Post.delete({ postId, user }))
         }
     }
@@ -56,7 +57,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Posts() {
-    const { posts, drafts, action } = useLoaderData()
+    const { posts, drafts, action, user } = useLoaderData()
     const isTap = useSearchParams()[0].get("tap")    
     const submit = useSubmit()
     const data = useActionData()
@@ -182,7 +183,7 @@ export default function Posts() {
                             {
                                 postsList.data.results.map((post, i) =>
                                     <AnimationWrapper key={i} transition={{ delay: i * 0.04 }}>
-                                        <ManagePublishedPostCard post={post} />
+                                        <ManagePublishedPostCard user={user} post={post} />
                                     </AnimationWrapper>
                                 )
                             }

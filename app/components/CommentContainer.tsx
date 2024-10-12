@@ -5,6 +5,7 @@ import CommentCard from "./CommentCard";
 import { useEffect, useState } from "react";
 import { useActionData, useSubmit } from "@remix-run/react";
 import LoadMoreDataBtn from "./LoadMoreDataBtn";
+import {NotAllowed} from "~/components/NotAllowed";
 
 const CommentContainer = ({ user, comments, commentWrapper, setCommentWrapper, post }) => {
     const submit = useSubmit()
@@ -26,7 +27,11 @@ const CommentContainer = ({ user, comments, commentWrapper, setCommentWrapper, p
                 </button>
             </div>
             <hr className=" border-grey my-8 w-[120%] -mr-10" />
-            <CommentField message={`أنت الآن تعلق على منشور @${post.author.username}`} placeholder="اترك تعليقا..." user={user} action={"تعليق"} />
+            {
+                user?.can_create_comment
+                    ? <CommentField message={`أنت الآن تعلق على منشور @${post.author.username}`} placeholder="اترك تعليقا..." user={user} action={"تعليق"} />
+                    : <NotAllowed message={"عفوا، لقد تم منعك من التعليق، رجاء تواصل مع إدارة الموقع."} />
+            }
             {
                 comments.status !== "error"
                     ? comments.data.results.map((comment, i) =>

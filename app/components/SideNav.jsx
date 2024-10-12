@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "@remix-run/react"
 import { useEffect, useRef, useState } from "react"
 
-const SideNav = ({newNotification}) => {
+const SideNav = ({newNotification, user}) => {
     const location = useLocation().pathname.split("/")[2]
     function getPathName(pathname){
         switch (pathname) {
@@ -44,12 +44,26 @@ const SideNav = ({newNotification}) => {
                     </button>
                     <hr ref={activeTapLine} className="absolute bottom-0 duration-500"/>
                 </div>
-                <div className={"h-[calc(100vh-80px-60px)] md:h-cover min-w-[200px] md:sticky top-24 p-6 md:pl-0 md:border-grey md:border-l absolute max-md:top-[64px] bg-white max-md:w-[calc(100%+80px)] max-md:px-16 max-md:-mr-7 duration-500 " + (!showSideNav ? "max-md:opacity-0 max-md:pointer-events-none" : "max-md:opacity-100 max-md:pointer-events-auto")}>
+                <div className={"overflow-y-auto h-[calc(100vh-80px-60px)] md:h-cover min-w-[250px] md:sticky top-24 p-6 md:pl-0 md:border-grey md:border-l absolute max-md:top-[64px] bg-white max-md:w-[calc(100%+80px)] max-md:px-16 max-md:-mr-7 duration-500 " + (!showSideNav ? "max-md:opacity-0 max-md:pointer-events-none" : "max-md:opacity-100 max-md:pointer-events-auto")}>
                     <h1 className="text-xl text-dark-grey mb-3 ">صفحة التحكم</h1>
                     <hr  className="border-grey -mr-6 mb-8 ml-6"/>
+                    {
+                        user.role === "ADMIN"
+                            ? <>
+                                <NavLink className={"sidebar-link"} to={"/dashboard/all-posts"} onClick={e => setPage(e.target.innerText)}>
+                                    <i className="fi fi-rr-border-all"></i>
+                                    المنشورات
+                                </NavLink>
+                                <NavLink className={"sidebar-link"} to={"/dashboard/users"} onClick={e => setPage(e.target.innerText)}>
+                                    <i className="fi fi-rr-users-alt"></i>
+                                    المستخدمون
+                                </NavLink>
+                            </>
+                            : null
+                    }
                     <NavLink className={"sidebar-link"} to={"/dashboard/posts"} onClick={e => setPage(e.target.innerText)}>
                         <i className="fi fi-rr-document"></i>
-                        المنشورات
+                        {user.role === "ADMIN" ? "منشوراتي" : "المنشورات"}
                     </NavLink>
                     <NavLink className={"sidebar-link"} to={"/dashboard/notifications"} onClick={e => setPage(e.target.innerText)}>
                         <div className="relative">

@@ -86,19 +86,24 @@ export default function editProfile() {
             }
         }
     }, [data]);
-
+    let tableNames = ["الصورة", "الاسم", "اسم المستخدم", "البريد", "خيارات"]
     return (
         <AnimationWrapper>
             <h1 className="max-md:hidden">تعديل الحساب</h1>
             <div className={"overflow-auto border border-black/10 mt-4 rounded-lg"}>
-                <table>
+                <table className="w-full">
                     <thead>
                     <tr>
-                        <th className={"text-center border-black/10 bg-black/5 p-2 border-b rounded-tr-lg"}>الصورة</th>
+                        {
+                            tableNames.map((name, i) => 
+                                <th className={"text-center border-black/10 bg-black/5 p-2 border-b " + (i === 0 ? "rounded-tr-lg " : null) + ((tableNames.length -1) === i ? "rounded-tl-lg" : null)}>{name}</th>
+                            )
+                        }
+                        {/* <th className={"text-center border-black/10 bg-black/5 p-2 border-b rounded-tr-lg"}>الصورة</th>
                         <th className={"text-center border-black/10 bg-black/5 p-2 border-b"}>الاسم</th>
                         <th className={"text-center border-black/10 bg-black/5 p-2 border-b"}>اسم المستخدم</th>
                         <th className={"text-center border-black/10 bg-black/5 p-2 border-b"}>البريد</th>
-                        <th className={"text-center border-black/10 bg-black/5 p-2 border-b rounded-tl-lg"}>خيارات</th>
+                        <th className={"text-center border-black/10 bg-black/5 p-2 border-b rounded-tl-lg"}>خيارات</th> */}
                     </tr>
                     </thead>
                     <tbody>
